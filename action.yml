@@ -1,0 +1,52 @@
+name: 'Pact Can I Deploy'
+description: 'Checks if a Pact version can be deployed to a target environment.'
+inputs:
+  artefact_version:
+    required: true
+    type: string
+  pact_application_name:
+    required: true
+    type: string
+  pact_broker_base_url:
+    required: false
+    default: 'https://hmcts-dts.pactflow.io'
+  pact_env:
+    required: false
+    default: 'dev/pactTest'
+secrets:
+  PACT_BROKER_TOKEN:
+    required: true
+runs:
+  using: "composite"
+  steps:
+    - name: Install Pact CLI
+      shell: bash
+      run: npm install -g @pact-foundation/pact-cli
+
+    - name: Tag Version
+      shell: bash
+      run: |
+        pact-broker create-version-tag \
+          --pacticipant "${{ inputs.pact_application_name }}" \
+          --version "${{ inputs.artefact_version }}" \
+          --tag "${{ inputs.pact_env }}" \
+          --broker-base-url "${{ inputs.pact_broker_base_url }}" \
+          --broker-token "${{ secrets.PACT_BROKER_TOKEN }}"
+
+    - name: Can I Deploy
+      shell: bash
+      run: |
+        pact-broker can-i-deploy \
+          --pacticipant "${{ inputs.pact_application_name }}" \
+          --version "${{ inputs.artefact_version }}" \
+          --to-environment "${{ inputs.pact_env }}" \
+          --broker-base-url "${{ inputs.pact_broker_base_url }}" \
+          --broker-token "${{ secrets.PACT_BROKER_TOKEN }}" \
+          --output table
+        can_i_deploy_status=$?
+        if [ "$can_i_deploy_status" -ne 0 ]; then
+          echo "❌ Can-I-Deploy failed — this version is NOT safe to deploy to ${{ inputs.pact_env }} - (deploy status: $can_i_deploy_status)"
+          exit 1
+        else
+          echo "✅ Can-I-Deploy succeeded — this version is safe to deploy to ${{ inputs.pact_env }}"
+        fi
