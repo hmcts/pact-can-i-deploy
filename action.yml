@@ -22,6 +22,9 @@ inputs:
 runs:
   using: "composite"
   steps:
+    - name: Set up Node.js
+      uses: actions/setup-node@v4
+
     - name: Install Pact CLI
       shell: bash
       run: npm install -g @pact-foundation/pact-cli
