@@ -7,33 +7,28 @@ This GitHub Composite Action checks whether a Pact-icipant version can be safely
 ### 🚀 Usage
 
 ```yaml
-- uses: ./.github/actions/pact-can-i-deploy
+- uses: hmcts/pact-can-i-deploy
   with:
-    artefact_version: 0.0.1
-    pact_application_name: ProviderApplicationName
-    pact_broker_base_url: https://hmcts-dts.pactflow.io
+    pact_broker_token: ${{ secrets.PACT_BROKER_TOKEN }}
+    pacticipant: ProviderApplicationName
+    pacticipant_version: 0.0.1
     pact_env: dev/pactTest
-  secrets:
-    PACT_BROKER_TOKEN: ${{ secrets.PACT_BROKER_TOKEN }}
+    pact_broker_base_url: https://hmcts-dts.pactflow.io # Optional, defaults to HMCTS-DTS Pact Broker
 ```
 
 ### ✅ What It Does
 
 1. Installs the Pact CLI
-2. Tags the given artefact version with the environment
+2. Tags the given Pacticipant artefact version with the environment
 3. Runs `can-i-deploy` check and fails the job if it cannot be deployed
 
 ### 📝 Inputs
 
-| Name                  | Required | Description                                                  |
-|-----------------------|----------|--------------------------------------------------------------|
-| `artefact_version`    | ✅       | The specific version of the pacticipant                      |
-| `pact_application_name` | ✅     | The name of the pacticipant (e.g. `ProviderApplicationName`) |
-| `pact_broker_base_url` |         | Optional. Defaults to the HMCTS-DTS organisation URL, i.e. https://hmcts-dts.pactflow.io  |
-| `pact_env`            |         | Optional. Defaults to `dev/pactTest`                         |
+| Name                     | Required | Description                                                  |
+|--------------------------|----------|--------------------------------------------------------------|
+| `pact_broker_token`  | ✅       | Token used to authenticate with the Pact Broker |
+| `pacticipant_version` | ✅     | The specific version of the pacticipant                      |
+| `pacticipant`            | ✅       | The name of the pacticipant (e.g. `ProviderApplicationName`) |
+| `pact_env`               | ✅       | The target environment for the deployment check              |
+| `pact_broker_base_url`   |          | Optional. Defaults to the HMCTS-DTS organisation URL, i.e. https://hmcts-dts.pactflow.io |
 
-### 🔐 Secrets
-
-| Name                 | Required | Description                     |
-|----------------------|----------|---------------------------------|
-| `PACT_BROKER_TOKEN`  | ✅       | Token used to authenticate with the Pact Broker |
